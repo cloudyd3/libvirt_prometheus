@@ -28,7 +28,7 @@ class DomainWorker:
         while True:
             domain_list = await asyncio.to_thread(self.conn.listAllDomains, 0)
             workers = [self.worker(domain) for domain in domain_list]
-            await asyncio.gather(*workers, return_exceptions=True)
+            await asyncio.gather(*workers, return_exceptions=False)
 
     async def worker(self, domain: libvirt.virDomain):
         domain_name = domain.name()
@@ -63,7 +63,7 @@ class DomainWorker:
             self.io_helper(domain),
             self.block_dev_helper(domain),
         ]
-        await asyncio.gather(*domain_coroutines, return_exceptions=True)
+        await asyncio.gather(*domain_coroutines, return_exceptions=False)
 
     async def cpu_helper(self, domain: libvirt.virDomain):
         cpu_time_abs = 0

@@ -22,7 +22,7 @@ class StoragePoolWorker:
         while True:
             pool_list = self.conn.listAllStoragePools(0)
             workers = [self.storage_pool_worker(pool) for pool in pool_list]
-            await asyncio.gather(*workers, return_exceptions=True)
+            await asyncio.gather(*workers, return_exceptions=False)
             await asyncio.sleep(5)
 
     async def storage_pool_worker(self, pool: libvirt.virStoragePool):
