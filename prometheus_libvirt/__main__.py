@@ -1,6 +1,8 @@
 import asyncio
+import logging
 import threading
 from wsgiref.simple_server import make_server
+
 
 import libvirt
 from prometheus_client import (
@@ -14,6 +16,12 @@ from prometheus_client import (
 from prometheus_libvirt.domain_worker import DomainWorker
 from prometheus_libvirt.storage_pool_worker import StoragePoolWorker
 from . import prometheus_desc
+
+
+logging.basicConfig(
+    level=logging.DEBUG,
+    format="[%(asctime)s] p%(process)s {%(pathname)s:%(lineno)d} %(levelname)s - %(message)s",
+)
 
 REGISTRY.unregister(GC_COLLECTOR)
 REGISTRY.unregister(PLATFORM_COLLECTOR)
