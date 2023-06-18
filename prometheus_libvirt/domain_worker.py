@@ -7,9 +7,6 @@ import xmltodict
 
 from prometheus_libvirt import prometheus_desc
 
-start_time = time.time()
-
-
 # noinspection PyProtectedMember
 class DomainWorker:
     __slots__ = "conn"

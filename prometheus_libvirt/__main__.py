@@ -1,4 +1,6 @@
 import asyncio
+from wsgiref.simple_server import make_server
+
 
 import libvirt
 from prometheus_client import (
@@ -6,7 +8,7 @@ from prometheus_client import (
     GC_COLLECTOR,
     PROCESS_COLLECTOR,
     PLATFORM_COLLECTOR,
-    start_wsgi_server,
+    make_wsgi_app,
 )
 
 from prometheus_libvirt.domain_worker import DomainWorker
@@ -44,7 +46,9 @@ prometheus_desc.libvirt_versions_info.labels(
 )
 
 if __name__ == "__main__":
-    start_wsgi_server(8000)
+    app = make_wsgi_app(disable_compression=True)
+    httpd = make_server('', 8000, app)
+    httpd.serve_forever()
     domain_worker = DomainWorker(conn=conn)
     storage_pool_worker = StoragePoolWorker(conn=conn)
     loop = asyncio.get_event_loop()
