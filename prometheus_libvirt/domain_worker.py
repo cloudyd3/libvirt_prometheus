@@ -141,32 +141,36 @@ class DomainWorker:
         domain_name = domain.name()
         domain_xml = ET.fromstring(domain.XMLDesc(0))
         for interface in domain_xml.iter("interface"):
-            stats = domain.interfaceStats(interface.find("target").attrib.get("dev"))
-            dev_mac = interface.find("mac").attrib.get("address")
-            prometheus_desc.libvirt_domain_io_rx_bytes.labels(
-                domain=domain_name, dev_mac=dev_mac
-            )._value.set(int(stats[0]))
-            prometheus_desc.libvirt_domain_io_rx_packets.labels(
-                domain=domain_name, dev_mac=dev_mac
-            )._value.set(int(stats[1]))
-            prometheus_desc.libvirt_domain_io_rx_errors.labels(
-                domain=domain_name, dev_mac=dev_mac
-            )._value.set(int(stats[2]))
-            prometheus_desc.libvirt_domain_io_rx_drops.labels(
-                domain=domain_name, dev_mac=dev_mac
-            )._value.set(int(stats[3]))
-            prometheus_desc.libvirt_domain_io_tx_bytes.labels(
-                domain=domain_name, dev_mac=dev_mac
-            )._value.set(int(stats[4]))
-            prometheus_desc.libvirt_domain_io_tx_packets.labels(
-                domain=domain_name, dev_mac=dev_mac
-            )._value.set(int(stats[5]))
-            prometheus_desc.libvirt_domain_io_tx_errors.labels(
-                domain=domain_name, dev_mac=dev_mac
-            )._value.set(int(stats[6]))
-            prometheus_desc.libvirt_domain_io_tx_drops.labels(
-                domain=domain_name, dev_mac=dev_mac
-            )._value.set(int(stats[7]))
+            if domain.isActive():
+                try:
+                    stats = domain.interfaceStats(interface.find("target").attrib.get("dev"))
+                    dev_mac = interface.find("mac").attrib.get("address")
+                    prometheus_desc.libvirt_domain_io_rx_bytes.labels(
+                        domain=domain_name, dev_mac=dev_mac
+                    )._value.set(int(stats[0]))
+                    prometheus_desc.libvirt_domain_io_rx_packets.labels(
+                        domain=domain_name, dev_mac=dev_mac
+                    )._value.set(int(stats[1]))
+                    prometheus_desc.libvirt_domain_io_rx_errors.labels(
+                        domain=domain_name, dev_mac=dev_mac
+                    )._value.set(int(stats[2]))
+                    prometheus_desc.libvirt_domain_io_rx_drops.labels(
+                        domain=domain_name, dev_mac=dev_mac
+                    )._value.set(int(stats[3]))
+                    prometheus_desc.libvirt_domain_io_tx_bytes.labels(
+                        domain=domain_name, dev_mac=dev_mac
+                    )._value.set(int(stats[4]))
+                    prometheus_desc.libvirt_domain_io_tx_packets.labels(
+                        domain=domain_name, dev_mac=dev_mac
+                    )._value.set(int(stats[5]))
+                    prometheus_desc.libvirt_domain_io_tx_errors.labels(
+                        domain=domain_name, dev_mac=dev_mac
+                    )._value.set(int(stats[6]))
+                    prometheus_desc.libvirt_domain_io_tx_drops.labels(
+                        domain=domain_name, dev_mac=dev_mac
+                    )._value.set(int(stats[7]))
+                except libvirt.libvirtError:
+                    pass
 
     async def block_dev_helper(self, domain: libvirt.virDomain):
         domain_name = domain.name()
