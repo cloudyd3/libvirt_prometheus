@@ -1,6 +1,6 @@
 import asyncio
+import threading
 from wsgiref.simple_server import make_server
-
 
 import libvirt
 from prometheus_client import (
@@ -45,10 +45,17 @@ prometheus_desc.libvirt_versions_info.labels(
     libvirt_lib=lib_version,
 )
 
+
+def run_server():
+    app = make_wsgi_app(registry=REGISTRY, disable_compression=True)
+    httpd = make_server("0.0.0.0", 8000, app)
+    t = threading.Thread(target=httpd.serve_forever)
+    t.daemon = True
+    t.start()
+
+
 if __name__ == "__main__":
-    app = make_wsgi_app(disable_compression=True)
-    httpd = make_server('', 8000, app)
-    httpd.serve_forever()
+    run_server()
     domain_worker = DomainWorker(conn=conn)
     storage_pool_worker = StoragePoolWorker(conn=conn)
     loop = asyncio.get_event_loop()
