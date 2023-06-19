@@ -1,17 +1,10 @@
 import asyncio
-import logging
 
 import defusedxml.ElementTree as ET
 import libvirt
 import xmltodict
 
 from prometheus_libvirt import prometheus_desc
-
-
-logging.basicConfig(
-    level=logging.DEBUG,
-    format="[%(asctime)s] p%(process)s {%(pathname)s:%(lineno)d} %(levelname)s - %(message)s",
-)
 
 # noinspection PyProtectedMember
 class DomainWorker:

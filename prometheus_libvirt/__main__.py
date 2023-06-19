@@ -1,5 +1,4 @@
 import asyncio
-import logging
 import threading
 from wsgiref.simple_server import make_server
 
