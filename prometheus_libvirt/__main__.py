@@ -3,6 +3,10 @@ import logging
 import threading
 from wsgiref.simple_server import make_server
 
+from flask import Flask, Response, request
+
+from keystoneauth1 import session, exceptions
+from keystoneclient.v3 import client
 
 import libvirt
 from prometheus_client import (
@@ -10,18 +14,21 @@ from prometheus_client import (
     GC_COLLECTOR,
     PROCESS_COLLECTOR,
     PLATFORM_COLLECTOR,
-    make_wsgi_app,
+    generate_latest,
 )
 
 from prometheus_libvirt.domain_worker import DomainWorker
 from prometheus_libvirt.storage_pool_worker import StoragePoolWorker
-from . import prometheus_desc
+from . import prometheus_desc, conf
 
 
-logging.basicConfig(
-    level=logging.DEBUG,
-    format="[%(asctime)s] p%(process)s {%(pathname)s:%(lineno)d} %(levelname)s - %(message)s",
-)
+CONF = conf.CONF()
+CONF.load_from_file()
+
+auth = CONF.authenticate()
+
+sess = session.Session(auth=auth)
+keystone = client.Client(session=sess)
 
 REGISTRY.unregister(GC_COLLECTOR)
 REGISTRY.unregister(PLATFORM_COLLECTOR)
@@ -53,9 +60,22 @@ prometheus_desc.libvirt_versions_info.labels(
     libvirt_lib=lib_version,
 )
 
+app = Flask(__name__)
+
+@app.route("/metrics", methods=['GET'])
+def return_metrics():
+    token = request.headers.get("X-Auth-Token")
+    if not token:
+        return Response(status=401, response="Authentication required")
+    try:
+        keystone.tokens.validate(token)
+    except exceptions.http.NotFound as e:
+        return Response(status=404, response=e.response.text)
+    response = Response(response=generate_latest(REGISTRY), status=200, mimetype="application/openmetrics-text")
+    return response
+
 
 def run_server():
-    app = make_wsgi_app(registry=REGISTRY, disable_compression=True)
     httpd = make_server("0.0.0.0", 8000, app)
     t = threading.Thread(target=httpd.serve_forever)
     t.daemon = True

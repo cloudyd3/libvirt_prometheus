@@ -1,6 +1,5 @@
 import asyncio
 import logging
-import time
 
 import defusedxml.ElementTree as ET
 import libvirt
