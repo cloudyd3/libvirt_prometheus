@@ -1,4 +1,4 @@
-import tomllib
+import tomli
 
 from keystoneauth1 import loading
 
@@ -14,7 +14,7 @@ class CONF:
 
     def load_from_file(self):
         with open(".config/config.toml", "rb") as f:
-            config = tomllib.load(f)
+            config = tomli.load(f)
         self.auth_url = config["keystone"]["auth_url"]
         if config["authentication"]:
             match config["authentication"]:
