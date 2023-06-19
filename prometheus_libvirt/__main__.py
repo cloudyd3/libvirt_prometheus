@@ -14,8 +14,8 @@ from prometheus_client import (
     GC_COLLECTOR,
     PROCESS_COLLECTOR,
     PLATFORM_COLLECTOR,
-    generate_latest,
 )
+from prometheus_client.openmetrics import exposition as openmetrics
 
 from prometheus_libvirt.domain_worker import DomainWorker
 from prometheus_libvirt.storage_pool_worker import StoragePoolWorker
@@ -71,7 +71,7 @@ def return_metrics():
         keystone.tokens.validate(token)
     except exceptions.http.NotFound as e:
         return Response(status=404, response=e.response.text)
-    response = Response(response=generate_latest(REGISTRY), status=200, mimetype="application/openmetrics-text")
+    response = Response(response=openmetrics.generate_latest(REGISTRY), status=200, mimetype="application/openmetrics-text")
     return response
 
 
