@@ -6,6 +6,7 @@ import xmltodict
 
 from prometheus_libvirt import prometheus_desc
 
+
 # noinspection PyProtectedMember
 class DomainWorker:
     __slots__ = "conn"
@@ -18,9 +19,10 @@ class DomainWorker:
 
     async def run(self):
         while True:
-            domain_list = await asyncio.to_thread(self.conn.listAllDomains, 0)
+            domain_list = self.conn.listAllDomains(0)
             workers = [self.worker(domain) for domain in domain_list]
             await asyncio.gather(*workers, return_exceptions=False)
+            await asyncio.sleep(5)
 
     async def worker(self, domain: libvirt.virDomain):
         domain_name = domain.name()
@@ -135,7 +137,9 @@ class DomainWorker:
         for interface in domain_xml.iter("interface"):
             if domain.isActive():
                 try:
-                    stats = domain.interfaceStats(interface.find("target").attrib.get("dev"))
+                    stats = domain.interfaceStats(
+                        interface.find("target").attrib.get("dev")
+                    )
                     dev_mac = interface.find("mac").attrib.get("address")
                     prometheus_desc.libvirt_domain_io_rx_bytes.labels(
                         domain=domain_name, dev_mac=dev_mac

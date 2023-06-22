@@ -18,11 +18,18 @@ class CONF:
         self.auth_url = config["keystone"]["auth_url"]
         if config["authentication"]:
             match config["authentication"]:
-                case {"method": "ApplicationCredential", "application_credential_id": str(),
-                      "application_credential_secret": str()}:
+                case {
+                    "method": "ApplicationCredential",
+                    "application_credential_id": str(),
+                    "application_credential_secret": str(),
+                }:
                     self.method = "v3applicationcredential"
-                    self.application_credential_id = config["authentication"]["application_credential_id"]
-                    self.application_credential_secret = config["authentication"]["application_credential_secret"]
+                    self.application_credential_id = config["authentication"][
+                        "application_credential_id"
+                    ]
+                    self.application_credential_secret = config["authentication"][
+                        "application_credential_secret"
+                    ]
                 case {"method": "password", "username": str(), "password": str()}:
                     self.method = "v3password"
                     self.username = config["authentication"]["username"]
@@ -33,8 +40,12 @@ class CONF:
     def authenticate(self):
         loader = loading.get_plugin_loader(self.method)
         if self.method == "v3applicationcredential":
-            return loader.load_from_options(auth_url=self.auth_url,
-                                            application_credential_id=self.application_credential_id,
-                                            application_credential_secret=self.application_credential_secret)
+            return loader.load_from_options(
+                auth_url=self.auth_url,
+                application_credential_id=self.application_credential_id,
+                application_credential_secret=self.application_credential_secret,
+            )
         elif self.method == "v3password":
-            return loader.load_from_options(auth_url=self.auth_url, username=self.username, password=self.password)
+            return loader.load_from_options(
+                auth_url=self.auth_url, username=self.username, password=self.password
+            )

@@ -20,7 +20,6 @@ from prometheus_libvirt.domain_worker import DomainWorker
 from prometheus_libvirt.storage_pool_worker import StoragePoolWorker
 from . import prometheus_desc, conf
 
-
 CONF = conf.CONF()
 CONF.load_from_file()
 
@@ -61,7 +60,8 @@ prometheus_desc.libvirt_versions_info.labels(
 
 app = Flask(__name__)
 
-@app.route("/metrics", methods=['GET'])
+
+@app.route("/metrics", methods=["GET"])
 def return_metrics():
     token = request.headers.get("X-Auth-Token")
     if not token:
@@ -70,7 +70,11 @@ def return_metrics():
         keystone.tokens.validate(token)
     except exceptions.http.NotFound as e:
         return Response(status=404, response=e.response.text)
-    response = Response(response=openmetrics.generate_latest(REGISTRY), status=200, mimetype="application/openmetrics-text")
+    response = Response(
+        response=openmetrics.generate_latest(REGISTRY),
+        status=200,
+        mimetype="application/openmetrics-text",
+    )
     return response
 
 
